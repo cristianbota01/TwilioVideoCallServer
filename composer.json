@@ -1,0 +1,17 @@
+{
+    "name": "cristianbota-ifortec/twilio-video-call-server",
+    "autoload": {
+        "psr-4": {
+            "CristianbotaIfortec\\TwilioVideoCallServer\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "cristianbota01",
+            "email": "c.bota@ifortech.com"
+        }
+    ],
+    "require": {
+        "twilio/sdk": "^6.43"
+    }
+}
