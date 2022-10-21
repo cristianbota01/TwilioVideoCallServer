@@ -1,4 +1,4 @@
-body{
+body {
     display: flex;
     justify-content: flex-start;
     align-items: center;
@@ -14,47 +14,105 @@ body{
     overflow-y: auto;
 }
 
-.video-container-main-div{
+select {
+    width: 90%;
+}
+
+.video-container-main-div {
     width: 100%;
     height: 100%;
 
     display: flex;
-    justify-content: space-around;
+    justify-content: center;
     align-items: center;
 
 }
 
-.video-container{
-    width: 600px;
-    height: auto;
-   
+.video-container {
+    width: 100%;
+    height: 100%;
 
-    margin: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
 
+}
+
+.video_1 {
     background-color: rgb(82, 82, 82);
     box-shadow: 0 0 10px 0 rgb(2, 2, 2);
     border-radius: 20px;
-
     display: flex;
+
+    justify-content: center;
+    align-items: center;
+
+    width: 640px;
+    height: 480px;
+
+    margin: 30px;
+
+    position: relative;
+
+    z-index: 1;
 }
 
-video{
+/* .video_1{
+    position: relative;
+}
+
+.video_2{
+    width: 300px;
+    height: 200px;
+
+    position: absolute;
+    bottom: -100px;
+    right: -100px;
+} */
+
+.control-panel-main-div {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    width: 400px;
     height: 100%;
-    width: 100%;
+}
+
+.control-panel {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    flex-direction: column;
+
+    width: 80%;
+    height: 80%;
+
+    background-color: rgb(61, 61, 80);
+    box-shadow: 0 0 10px 0 rgb(50, 50, 70);
+    border-radius: 20px;
+}
+
+video {
+    width: 640px;
+    height: 480px;
 
     border-radius: 20px;
 }
 
-.footer-main-div{
-    width: 100%;
-    height: 100px;
+.footer-main-div {
+    width: 400px;
+    height: 100%;
 
     display: flex;
-    justify-content: space-around;
+    justify-content: center;
     align-items: center;
+    flex-direction: column;
 }
 
-.button{
+.button {
+    width: 80%;
     padding: 20px;
     border-radius: 10px;
     color: white;
@@ -63,9 +121,67 @@ video{
     cursor: pointer;
     box-shadow: 0 0 5px 0 rgb(2, 2, 2);
     transition: ease-in-out 0.2s;
-    margin: 30px;
+    margin-top: 30px;
+    margin-bottom: 30px;
+
 }
 
-.button:hover{
+.button:hover {
     background-color: rgb(83, 95, 95);
+}
+
+.container_row {
+    display: flex;
+}
+
+.layer1 {
+    width: 100%;
+
+}
+
+.layer2 {
+    width: 100%;
+    margin-left: -100%;
+
+}
+
+.tv-static {
+    width: 640px;
+    height: 480px;
+    margin: auto;
+    border-radius: 20px;
+    background-image: repeating-radial-gradient(circle at 17% 32%, rgb(0, 0, 0), grey 0.00085px);
+}
+
+.animation1 {
+    animation: back1 1s linear infinite;
+}
+
+.animation2 {
+    animation: back2 0.1s linear infinite;
+}
+
+@keyframes back1 {
+    from {
+        background-size: 100% 100%;
+    }
+
+    to {
+        background-size: 99% 100%;
+    }
+}
+
+@keyframes back2 {
+    from {
+        background-size: 48.56% 50%;
+    }
+
+    to {
+        background-size: 43.9% 50.1%;
+    }
+}
+
+p{
+    color: white;
+    font-family: "Corbel";
 }

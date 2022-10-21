@@ -12,22 +12,63 @@
 
 <body>
     <div class="video-container-main-div">
-        <div class="video-container">
-
+        <div class="footer-main-div">
+            <button class="button" onclick="CreateRoom()">
+                Inizia chiamata
+            </button>
+            <button class="button" onclick="Terminate()">
+                Termina la chiamata
+            </button>
         </div>
-    </div>
-    <div class="footer-main-div">
-        <button class="button" onclick="CreateRoom()">
-            Inizia chiamata
-        </button>
-        <button class="button" onclick="Terminate()">
-            Termina la chiamata
-        </button>
+        <div class="video-container">
+            <p id="status-room"></p>
+            <p id="status-participant"></p>
+            <div class="video_1">
+                <div class="layer1">
+                    <div class="tv-static animation1"></div>
+                </div>
+
+                <div class="layer2">
+                    <div class="tv-static animation2"></div>
+                </div>
+            </div>
+            <!-- <div class="video_2">
+
+            </div> -->
+        </div>
+        <!-- <div class="control-panel-main-div">
+            <div class="control-panel">
+
+            </div>
+        </div> -->
     </div>
 </body>
 
 <script>
     const Video = Twilio.Video;
+
+    var statusRoom = false
+    var statusParticipant = false
+
+    const GeneralStatus = (status_room, status_participant) => {
+        if (status_room == true) {
+            statusRoom = true
+            document.querySelector("#status-room").innerHTML = "Status room: on"
+        } else {
+            statusRoom = false
+            document.querySelector("#status-room").innerHTML = "Status room: off"
+        }
+
+        if (status_participant == true) {
+            statusParticipant = true
+            statusParticipant = document.querySelector("#status-participant").innerHTML = "Status participant: on"
+        } else {
+            statusParticipant = false
+            statusParticipant = document.querySelector("#status-participant").innerHTML = "Status participant: off"
+        }
+    }
+
+    GeneralStatus(false, false)
 
     const JoinRoom = () => {
         fetch("./joinRoom.php?identity=admin", {
@@ -36,7 +77,8 @@
             return response.json()
         }).then(json_response => {
             if (json_response.response === "ok") {
-                connectToRoom(json_response.token, json_response.room_name, true, true, true)
+                GeneralStatus(true, false)
+                connectToRoom(json_response.token, json_response.room_name)
             }
         })
     }
@@ -56,7 +98,7 @@
         })
     }
 
-    const connectToRoom = (token, roomName, audioinputvalue, audiooutputvalue, videoinputvalue) => {
+    /* const connectToRoom = (token, roomName, audioinputvalue, audiooutputvalue, videoinputvalue) => {
 
         const {
             connect,
@@ -82,10 +124,11 @@
 
                 console.log(`Successfully joined a Room: ${room}`);
 
-                const videoChatWindow = document.querySelector('.video-container');
+                const videoChatWindowMain = document.querySelector('.video_1');
+                const videoChatWindowGuest = document.querySelector('.video_2');
 
                 createLocalVideoTrack().then(track => {
-                    videoChatWindow.appendChild(track.attach());
+                    videoChatWindowMain.appendChild(track.attach());
                 });
 
                 room.on('trackSubscribed', track => {
@@ -105,12 +148,12 @@
                     participant.tracks.forEach(publication => {
                         if (publication.isSubscribed) {
                             const track = publication.track;
-                            videoChatWindow.appendChild(track.attach());
+                            videoChatWindowGuest.appendChild(track.attach());
                         }
                     });
 
                     participant.on('trackSubscribed', track => {
-                        videoChatWindow.appendChild(track.attach());
+                        videoChatWindowGuest.appendChild(track.attach());
                     });
 
 
@@ -118,6 +161,65 @@
             }, error => {
                 console.error(`Unable to connect to Room: ${error.message}`);
             });
+        })
+
+    }; */
+
+    const connectToRoom = (token, roomName) => {
+
+        const {
+            connect,
+            createLocalTracks
+        } = Video;
+
+        createLocalTracks({
+            audio: false,
+            video: false
+        }).then(local_tracks => {
+
+            let connectOption = {
+                name: roomName,
+                tracks: local_tracks
+            };
+
+            connect(token, connectOption).then(room => {
+
+                console.log(`Successfully joined a Room: ${room}`);
+
+                const videoChatWindowMain = document.querySelector('.video_1');
+
+                room.on('participantConnected', participant => {
+
+                    videoChatWindowMain.innerHTML = ""
+
+                    console.log(`Participant "${participant.identity}" connected`);
+
+                    GeneralStatus(true, true)
+
+                    participant.tracks.forEach(publication => {
+                        if (publication.isSubscribed) {
+                            const track = publication.track;
+                            videoChatWindowMain.appendChild(track.attach());
+                        }
+                    });
+
+                    participant.on('trackSubscribed', track => {
+                        videoChatWindowMain.appendChild(track.attach());
+                    })
+
+                    participant.on('reconnecting', () => {
+                        console.log(`${participant.identity} is reconnecting the signaling connection to the Room!`);
+                        videoChatWindowMain.innerHTML = '<div class="layer1"><div class="tv-static animation1"></div></div><div class="layer2"><div class="tv-static animation2"></div></div>'
+                        GeneralStatus(true, false)
+
+                    })
+
+                });
+
+            }, error => {
+                console.error(`Unable to connect to Room: ${error.message}`);
+            });
+
         })
 
     };
