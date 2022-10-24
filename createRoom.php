@@ -8,17 +8,31 @@ use Twilio\Jwt\Grants\VideoGrant;
 
 define("AUTH_ID", "12345");
 
-if (isset($_POST["auth_id"])) {
-    if ($_POST["auth_id"] === AUTH_ID) {
+if (isset($_POST["auth_id"]) && isset($_POST["type"])) {
 
-        try {
-           
+    
 
+    try {
+
+        if ($_POST["auth_id"] === AUTH_ID && $_POST["type"] === "create") {
             $room = $twilio->video->v1->rooms->create(["uniqueName" => "educational_room", "emptyRoomTimeout" => 1]);
-        } catch (\Throwable $th) {
-            //
+            echo json_encode(["response" => "ok", "sid" => $room->sid]);
         }
 
-        echo json_encode(["response" => "ok"]);
+    } catch (\Throwable $th) {
+
+        $room_sid = $twilio->video->v1->rooms("educational_room")->fetch()->sid;
+        echo json_encode(["response" => "ok", "sid" => $room_sid]);
+
+    }
+
+    try {
+
+        if ($_POST["auth_id"] === AUTH_ID && $_POST["type"] === "complete" && isset($_POST["sid"])) {
+            $twilio->video->v1->rooms($_POST["sid"])->update("completed");
+            echo json_encode(["response" => "ok"]);
+        }
+    } catch (\Throwable $th) {
+        echo json_encode(["response" => "nok"]);
     }
 }

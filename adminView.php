@@ -16,7 +16,7 @@
             <button class="button" onclick="CreateRoom()">
                 Inizia chiamata
             </button>
-            <button class="button" onclick="Terminate()">
+            <button class="button" id="terminate-button">
                 Termina la chiamata
             </button>
         </div>
@@ -49,6 +49,7 @@
 
     var statusRoom = false
     var statusParticipant = false
+    var room_sid = ""
 
     const GeneralStatus = (status_room, status_participant) => {
         if (status_room == true) {
@@ -87,13 +88,34 @@
         fetch("./createRoom.php", {
             method: "POST",
             body: new URLSearchParams({
-                "auth_id": 12345
+                "auth_id": 12345,
+                "type": "create"
             })
         }).then(response => {
             return response.json()
         }).then(json_response => {
             if (json_response.response === "ok") {
+                console.log(json_response)
+                room_sid = json_response.sid
                 JoinRoom()
+            }
+        })
+    }
+
+    const CompleteRoom = () => {
+        console.log("icoa")
+        fetch("./createRoom.php", {
+            method: "POST",
+            body: new URLSearchParams({
+                "auth_id": 12345,
+                "type": "complete",
+                "sid": room_sid
+            })
+        }).then(response => {
+            return response.json()
+        }).then(json_response => {
+            if (json_response.response === "ok") {
+                GeneralStatus(false, false)
             }
         })
     }
@@ -188,6 +210,12 @@
 
                 const videoChatWindowMain = document.querySelector('.video_1');
 
+                document.querySelector("#terminate-button").addEventListener("click", () => {
+                    videoChatWindowMain.innerHTML = '<div class="layer1"><div class="tv-static animation1"></div></div><div class="layer2"><div class="tv-static animation2"></div></div>'
+                    CompleteRoom()
+                    room.disconnect()
+                })
+
                 room.on('participantConnected', participant => {
 
                     videoChatWindowMain.innerHTML = ""
@@ -214,6 +242,12 @@
 
                     })
 
+                });
+
+                room.on('participantDisconnected', participant => {
+                    videoChatWindowMain.innerHTML = '<div class="layer1"><div class="tv-static animation1"></div></div><div class="layer2"><div class="tv-static animation2"></div></div>'
+                    console.log("Disconnected => ", participant)
+                    GeneralStatus(true, false)
                 });
 
             }, error => {

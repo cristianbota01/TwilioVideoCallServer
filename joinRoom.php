@@ -9,7 +9,6 @@ use Twilio\Jwt\Grants\VideoGrant;
 if ($_SERVER["REQUEST_METHOD"] === "GET") {
 
     
-    $twilio = new Client($sid, $token);
 
     $rooms = $twilio->video->v1->rooms->read(["status" => "in-progress"], 1);
 

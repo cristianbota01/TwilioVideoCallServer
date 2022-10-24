@@ -185,3 +185,8 @@ p{
     color: white;
     font-family: "Corbel";
 }
+
+canvas{
+    width: 300px;
+    height: 40px;
+}
