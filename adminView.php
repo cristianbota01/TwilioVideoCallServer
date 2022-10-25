@@ -216,6 +216,12 @@
                     room.disconnect()
                 })
 
+                window.addEventListener('beforeunload', () => {
+                    videoChatWindowMain.innerHTML = '<div class="layer1"><div class="tv-static animation1"></div></div><div class="layer2"><div class="tv-static animation2"></div></div>'
+                    CompleteRoom()
+                    room.disconnect();
+                });
+
                 room.on('participantConnected', participant => {
 
                     videoChatWindowMain.innerHTML = ""
@@ -224,12 +230,12 @@
 
                     GeneralStatus(true, true)
 
-                    participant.tracks.forEach(publication => {
+                    /* participant.tracks.forEach(publication => {
                         if (publication.isSubscribed) {
                             const track = publication.track;
                             videoChatWindowMain.appendChild(track.attach());
                         }
-                    });
+                    }); */
 
                     participant.on('trackSubscribed', track => {
                         videoChatWindowMain.appendChild(track.attach());
@@ -244,9 +250,15 @@
 
                 });
 
-                room.on('participantDisconnected', participant => {
+                room.on('disconnected', participant => {
                     videoChatWindowMain.innerHTML = '<div class="layer1"><div class="tv-static animation1"></div></div><div class="layer2"><div class="tv-static animation2"></div></div>'
                     console.log("Disconnected => ", participant)
+                    GeneralStatus(true, false)
+                });
+
+                room.on('participantDisconnected', participant => {
+                    videoChatWindowMain.innerHTML = '<div class="layer1"><div class="tv-static animation1"></div></div><div class="layer2"><div class="tv-static animation2"></div></div>'
+                    console.log("Participant disconnected => ", participant)
                     GeneralStatus(true, false)
                 });
 

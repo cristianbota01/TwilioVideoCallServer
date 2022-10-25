@@ -12,13 +12,60 @@
 
 <body>
     <div class="video-container-main-div">
-        <div class="footer-main-div">
-            <button class="button" onclick="JoinRoom()">
-                Inizia chiamata
-            </button>
-            <button class="button" id="terminate-button">
-                Esci dalla chiamata
-            </button>
+        <div class="control-panel-main-div">
+            <div class="control-panel">
+                <p>Seleziona microfono</p>
+                <select name="audioinput" id="selectaudioinput">
+
+                </select>
+                <p>Seleziona webcam</p>
+                <select name="videoinput" id="selectvideoinput">
+
+                </select>
+                <p>Seleziona altoparlante</p>
+                <select name="audiooutput" id="selectaudiooutput">
+
+                </select>
+
+                <button class="button" id="audio-button-switch">
+                    Audio
+                </button>
+                <button class="button" id="video-button-switch">
+                    Video
+                </button>
+                <button class="button" onclick="JoinRoom()">
+                    Inizia chiamata
+                </button>
+                <button class="button" id="terminate-button">
+                    Esci dalla chiamata
+                </button>
+
+                <!-- <canvas id="canvas"></canvas> -->
+
+                <div class="pids-wrapper">
+                    <div class="pid"></div>
+                    <div class="pid"></div>
+                    <div class="pid"></div>
+                    <div class="pid"></div>
+                    <div class="pid"></div>
+                    <div class="pid"></div>
+                    <div class="pid"></div>
+                    <div class="pid"></div>
+                    <div class="pid"></div>
+                    <div class="pid"></div>
+                    <div class="pid"></div>
+                    <div class="pid"></div>
+                    <div class="pid"></div>
+                    <div class="pid"></div>
+                    <div class="pid"></div>
+                    <div class="pid"></div>
+                    <div class="pid"></div>
+                    <div class="pid"></div>
+                    <div class="pid"></div>
+                    <div class="pid"></div>
+                </div>
+
+            </div>
         </div>
         <div class="video-container">
             <div class="video_1">
@@ -34,28 +81,12 @@
 
             </div> -->
         </div>
-        <div class="control-panel-main-div">
-            <div class="control-panel">
-                <p>Seleziona microfono</p>
-                <select name="audioinput" id="selectaudioinput">
-
-                </select>
-                <p>Seleziona webcam</p>
-                <select name="videoinput" id="selectvideoinput">
-
-                </select>
-                <p>Seleziona altoparlante</p>
-                <select name="audiooutput" id="selectaudiooutput">
-
-                </select>
-               
-                
-                <canvas id="canvas"></canvas>
-            </div>
-        </div>
     </div>
     <script>
         const Video = Twilio.Video;
+        var video_track = null,
+            video_on = false,
+            audio_on = false
 
         const JoinRoom = () => {
             fetch("./joinRoom.php?identity=guest", {
@@ -192,19 +223,99 @@
 
                 connect(token, connectOption).then(room => {
 
+                    console.log(room.localParticipant)
+
+                    window.addEventListener('beforeunload', () => {
+                        room.disconnect();
+                    });
+
                     document.querySelector("#terminate-button").addEventListener("click", () => {
+                        disableCamera()
                         room.disconnect()
+                    })
+
+                    document.querySelector("#audio-button-switch").addEventListener("click", () => {
+                        room.localParticipant.audioTracks.forEach(publication => {
+                            publication.track.disable()
+                        });
+                    })
+
+                    const enableCamera = () => {
+                        video_on = true
+
+                        room.localParticipant.videoTracks.forEach(publication => {
+                            publication.track.enable()
+                        })
+
+                        createLocalVideoTrack().then(track => {
+                            video_track = track
+                            videoChatWindowMain.appendChild(track.attach());
+                        });
+
+                    }
+
+                    const disableCamera = () => {
+                        video_on = false
+
+                        room.localParticipant.videoTracks.forEach(publication => {
+                            publication.track.disable()
+                        })
+
+                        setTimeout(() => {
+                            var detachedElements = video_track.detach();
+                            detachedElements.forEach(function(el) {
+                                el.remove();
+                            });
+                        }, 5000)
+
+
+
+                    }
+
+                    document.querySelector("#video-button-switch").addEventListener("click", () => {
+
+                        /* room.localParticipant.videoTracks.forEach(publication => {
+                            publication.track.disable()
+                            //publication.track.stop()
+                            console.log(publication.track.detach())
+                            
+                        }); */
+
+                        /* room.localParticipant.videoTracks.forEach(track => {
+                            const attachedElements = track.detach();
+                            attachedElements.forEach(element => element.remove());
+                        }); */
+
+                        /* console.log("sas")
+
+                        console.log(local_tracks)
+                        console.log(room.localParticipant.videoTracks)
+
+                        local_tracks[1].disable()
+                        local_tracks[1].detach().forEach(element => element.remove());
+
+                        console.log(local_tracks[1].detach()) */
+
+                        if (video_on == true) {
+                            disableCamera()
+                        } else {
+                            enableCamera()
+                        }
+
+                        /* room.localParticipant.videoTracks.forEach(publication => {
+                            publication.unpublish();
+                            publication.track.stop();
+                        }); */
+
                     })
 
                     console.log(`Successfully joined a Room: ${room}`);
 
                     const videoChatWindowMain = document.querySelector('.video_1');
 
-                    videoChatWindowMain.innerHTML = ""
+                    enableCamera()
 
-                    createLocalVideoTrack().then(track => {
-                        videoChatWindowMain.appendChild(track.attach());
-                    });
+                    videoChatWindowMain.innerHTML = ""
 
                     room.on('trackSubscribed', track => {
 
@@ -217,7 +328,9 @@
                     });
 
                     room.on('disconnected', (room, error) => {
-                        console.log(error)
+                        console.log("disconnected => ", error)
+                        disableCamera()
+                        room.disconnect();
                     });
 
                 }, error => {
@@ -232,8 +345,65 @@
         /* navigator.mediaDevices.getUserMedia({
             audio: true
         }).then(function(stream) {
-            audioViz(stream)
+            audioViz2(stream)
         }) */
+
+        function audioViz2(stream) {
+
+            const audioContext = new AudioContext();
+            const analyser = audioContext.createAnalyser();
+            const microphone = audioContext.createMediaStreamSource(stream);
+            const scriptProcessor = audioContext.createScriptProcessor(2048, 1, 1);
+
+            analyser.smoothingTimeConstant = 0.8;
+            analyser.fftSize = 1024;
+
+            microphone.connect(analyser);
+            analyser.connect(scriptProcessor);
+            scriptProcessor.connect(audioContext.destination);
+
+            scriptProcessor.onaudioprocess = function() {
+
+                const array = new Uint8Array(analyser.frequencyBinCount);
+                analyser.getByteFrequencyData(array);
+                const arraySum = array.reduce((a, value) => a + value, 0);
+                const average = arraySum / array.length;
+                //console.log(Math.round(average));
+                colorPids(average);
+            };
+
+        }
+
+
+        function colorPids(vol) {
+
+            console.log(vol)
+
+            const allPids = [...document.querySelectorAll('.pid')];
+            const numberOfPidsToColor = Math.round(vol / 5);
+            const pidsToColor = allPids.slice(0, numberOfPidsToColor);
+
+            for (const pid of allPids) {
+                pid.style.backgroundColor = "#e6e7e8";
+            }
+
+            for (const pid of pidsToColor) {
+                // console.log(pid[i]);
+                if (vol > 0 && vol < 40) {
+                    pid.style.backgroundColor = "#69ce2b";
+                }
+
+                if (vol > 40 && vol < 70) {
+                    pid.style.backgroundColor = "#CEC52B";
+                }
+
+                if (vol > 70) {
+                    pid.style.backgroundColor = "#CE402B";
+                }
+
+            }
+
+        }
 
         function audioViz(stream) {
 

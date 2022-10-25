@@ -10,7 +10,7 @@ define("AUTH_ID", "12345");
 
 if (isset($_POST["auth_id"]) && isset($_POST["type"])) {
 
-    
+   
 
     try {
 
